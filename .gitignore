@@ -3,6 +3,21 @@ output.txt
 
 old_build.xml
 
+# Eclipse #
+.settings/
+bin/
+tmp/
+test/
+.metadata
+.classpath
+.project
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+
 # Compiled class file
 *.class
 
