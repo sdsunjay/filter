@@ -37,10 +37,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Writer;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Scanner;
 /**
  * A Filter that removes stop words, replaces links and emotes, and does stemming.
  * It does pretty much everything but Location replacement, and only because that takes longer.
@@ -68,35 +70,47 @@ public class EriqFilter extends TextFilter {
     // " http://bit.ly/WbcrU";
     //    String test2 = "RT @pawlooza: ... wished @netflix had The Littlest Hobo. oakland, oakley, San Porto, Santa Cruz, South Lake Sunjay, Orange something really long";
 
+    String inputFilename = "testPosts.txt";
+    String outputFilename = "output.txt";
     TextFilter eriqFilter = new EriqFilter();
-    List<String> rtn;
-    rtn = ReadFile.readFile("testPosts.txt");
     Writer writer = null;
 
     try {
-      File outputFile = new File("output.txt");
+      File outputFile = new File(outputFilename);
       outputFile.createNewFile(); // if file already exists will do nothing
       FileOutputStream oFile = new FileOutputStream(outputFile, false);
       writer = new BufferedWriter(new OutputStreamWriter(oFile, "utf-8"));
-      for(int i = 0;i<rtn.size();i++){
-        writer.write(eriqFilter.filter(rtn.get(i)) + "\n");
+      FileInputStream inputStream = null;
+      Scanner sc = null;
+      String line = null;
+      try {
+        inputStream = new FileInputStream(inputFilename);
+        sc = new Scanner(inputStream, "UTF-8");
+
+        while (sc.hasNextLine()) {
+           line = sc.nextLine();
+           writer.write(eriqFilter.filter(line) + "\n");
+          // System.out.println(line);
+        }
+        // note that Scanner suppresses exceptions
+        if (sc.ioException() != null) {
+          throw sc.ioException();
+        }
+      } catch (IOException ex) {
+        System.err.println("An error occurred with reading from the file");
+      } finally {
+        if (inputStream != null) {
+          inputStream.close();
+        }
+        if (sc != null) {
+          sc.close();
+        }
       }
     } catch (IOException ex) {
       System.err.println("An error occurred with outputting to file");
     } finally {
       try {writer.close();} catch (Exception ex) {/*ignore*/}
     }
-    /*
-    for(int i = 0;i<rtn.size();i++){
-      System.out.println("Original text: " + rtn.get(i));
-      System.out.println("Filtered text: " + eriqFilter.filter(rtn.get(i)));
-    }*/
-    /* System.out.println("Original text: " + test1);
-       System.out.println("Filtered text: " + eriqFilter.filter(test1));
-       System.out.println("Removed: " + eriqFilter.toString());
-       System.out.println("Original text: " + test2);
-       System.out.println("Filtered text: " + eriqFilter.filter(test2));
-       */
   }
 
   public EriqFilter(boolean replaceMetaWords) {
